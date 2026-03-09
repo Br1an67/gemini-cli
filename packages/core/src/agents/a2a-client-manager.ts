@@ -35,6 +35,7 @@ import {
   isPrivateIpAsync,
   safeLookup,
   isLoopbackHost,
+  safeFetch,
 } from '../utils/fetch.js';
 import { debugLogger } from '../utils/debugLogger.js';
 
@@ -58,11 +59,6 @@ interface InternalGrpcExtensions {
   grpcChannelOptions: Record<string, unknown>;
 }
 
-// Local extension of RequestInit to support Node.js/undici dispatcher
-interface NodeFetchInit extends RequestInit {
-  dispatcher?: UndiciAgent;
-}
-
 // Remote agents can take 10+ minutes (e.g. Deep Research).
 // Use a dedicated dispatcher so the global 5-min timeout isn't affected.
 const A2A_TIMEOUT = 1800000; // 30 minutes
@@ -74,10 +70,8 @@ const a2aDispatcher = new UndiciAgent({
     lookup: safeLookup,
   },
 });
-const a2aFetch: typeof fetch = (input, init) => {
-  const nodeInit: NodeFetchInit = { ...init, dispatcher: a2aDispatcher };
-  return fetch(input, nodeInit as RequestInit);
-};
+const a2aFetch: typeof fetch = (input, init) =>
+  safeFetch(input, { ...init, dispatcher: a2aDispatcher });
 
 /**
  * Orchestrates communication with remote A2A agents.
