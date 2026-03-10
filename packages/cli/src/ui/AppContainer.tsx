@@ -1384,14 +1384,11 @@ Logging in with Google... Restarting Gemini CLI to continue.
     }
   }, [buffer, terminalWidth, terminalHeight, controlsHeight]);
 
-  // Compute available terminal height based on controls measurement
+  // Compute available terminal height based on controls measurement.
+  // We subtract 1 line for the bottom padding in the app layout.
   const availableTerminalHeight = Math.max(
     0,
-    terminalHeight -
-      controlsHeight -
-      staticExtraHeight -
-      2 -
-      backgroundShellHeight,
+    terminalHeight - controlsHeight - backgroundShellHeight - 1,
   );
 
   config.setShellExecutionConfig({
