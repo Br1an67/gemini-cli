@@ -27,6 +27,7 @@ import open from 'open';
 import process from 'node:process';
 import {
   ExtensionManager,
+  ExtensionAlreadyInstalledError,
   inferInstallMetadata,
 } from '../../config/extension-manager.js';
 import { SettingScope } from '../../config/settings.js';
@@ -524,13 +525,13 @@ async function installAction(
       text: `Extension "${extension.name}" installed successfully.`,
     });
   } catch (error) {
-    const message = getErrorMessage(error);
-    if (message.includes('already installed')) {
+    if (error instanceof ExtensionAlreadyInstalledError) {
       context.ui.addItem({
         type: MessageType.WARNING,
         text: `Extension from "${source}" is already installed.`,
       });
     } else {
+      const message = getErrorMessage(error);
       context.ui.addItem({
         type: MessageType.ERROR,
         text: `Failed to install extension from "${source}": ${message}`,
@@ -595,13 +596,13 @@ async function linkAction(context: CommandContext, args: string) {
       text: `Extension "${extension.name}" linked successfully.`,
     });
   } catch (error) {
-    const message = getErrorMessage(error);
-    if (message.includes('already installed')) {
+    if (error instanceof ExtensionAlreadyInstalledError) {
       context.ui.addItem({
         type: MessageType.WARNING,
         text: `Extension from "${sourceFilepath}" is already installed.`,
       });
     } else {
+      const message = getErrorMessage(error);
       context.ui.addItem({
         type: MessageType.ERROR,
         text: `Failed to link extension from "${sourceFilepath}": ${message}`,

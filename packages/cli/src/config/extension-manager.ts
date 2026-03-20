@@ -84,6 +84,18 @@ import type { EventEmitter } from 'node:stream';
 import { themeManager } from '../ui/themes/theme-manager.js';
 import { getFormattedSettingValue } from '../commands/extensions/utils.js';
 
+/**
+ * Thrown when attempting to install an extension that is already installed.
+ */
+export class ExtensionAlreadyInstalledError extends Error {
+  constructor(extensionName: string) {
+    super(
+      `Extension "${extensionName}" is already installed. Please uninstall it first.`,
+    );
+    this.name = 'ExtensionAlreadyInstalledError';
+  }
+}
+
 interface ExtensionManagerParams {
   enabledExtensionOverrides?: string[];
   settings: MergedSettings;
@@ -309,9 +321,7 @@ Would you like to attempt to install via "git clone" instead?`,
             `Extension "${previousName}" was not already installed, cannot update it.`,
           );
         } else if (!isUpdate && previous) {
-          throw new Error(
-            `Extension "${newExtensionName}" is already installed. Please uninstall it first.`,
-          );
+          throw new ExtensionAlreadyInstalledError(newExtensionName);
         } else if (isUpdate && nameConflict) {
           throw new Error(
             `Cannot update to "${newExtensionName}" because an extension with that name is already installed.`,

@@ -12,6 +12,7 @@ import {
 import { SettingScope } from '../../config/settings.js';
 import {
   ExtensionManager,
+  ExtensionAlreadyInstalledError,
   inferInstallMetadata,
 } from '../../config/extension-manager.js';
 import { McpServerEnablementManager } from '../../config/mcp/mcpServerEnablement.js';
@@ -253,13 +254,13 @@ export class InstallExtensionCommand implements Command {
         data: `Extension "${extension.name}" installed successfully.`,
       };
     } catch (error) {
-      const message = getErrorMessage(error);
-      if (message.includes('already installed')) {
+      if (error instanceof ExtensionAlreadyInstalledError) {
         return {
           name: this.name,
           data: `Extension from "${source}" is already installed.`,
         };
       }
+      const message = getErrorMessage(error);
       return {
         name: this.name,
         data: `Failed to install extension from "${source}": ${message}`,
@@ -305,13 +306,13 @@ export class LinkExtensionCommand implements Command {
         data: `Extension "${extension.name}" linked successfully.`,
       };
     } catch (error) {
-      const message = getErrorMessage(error);
-      if (message.includes('already installed')) {
+      if (error instanceof ExtensionAlreadyInstalledError) {
         return {
           name: this.name,
           data: `Extension from "${sourceFilepath}" is already installed.`,
         };
       }
+      const message = getErrorMessage(error);
       return {
         name: this.name,
         data: `Failed to link extension: ${message}`,
